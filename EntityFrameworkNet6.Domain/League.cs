@@ -1,8 +1,10 @@
-﻿namespace EntityFrameworkNet6.Domain
+﻿using EntityFrameworkNet6.Domain.Common;
+
+namespace EntityFrameworkNet6.Domain
 {
-    public class League
+    public class League:BaseDomainObject
     {
-        public int Id { get; set; }
         public string Name { get; set; }
+        public List<Team> Teams { get; set; }
     }
 }
