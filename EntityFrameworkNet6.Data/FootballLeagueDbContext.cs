@@ -1,15 +1,18 @@
-﻿using EntityFrameworkNet6.Domain;
+﻿using EntityFrameworkNet6.Data.Configurations.Entities;
+using EntityFrameworkNet6.Domain;
+using EntityFrameworkNet6.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace EntityFrameworkNet6.Data
 {
-    public class FootballLeagueDbContext : DbContext
+    public class FootballLeagueDbContext : AuditableFootballLeagueDbContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDb;Initial Catalog=FootballLeagueEFCore6")
-                .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Name }, LogLevel.Information);
+                .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Name }, LogLevel.Information)
+                .EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -29,6 +32,12 @@ namespace EntityFrameworkNet6.Data
                             .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<TeamsCoachesLeaguesView>().HasNoKey().ToView("TeamsCoachesLeagues");
+
+            modelBuilder.ApplyConfiguration(new LeagueSeedConfiguration());
+
+            modelBuilder.ApplyConfiguration(new TeamSeedConfiguration());
+
+            modelBuilder.ApplyConfiguration(new CoachSeedConfiguration());
         }
 
         public DbSet<Team> Teams { get; set; }

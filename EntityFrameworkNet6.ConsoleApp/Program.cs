@@ -29,7 +29,7 @@ internal class Program
         //await SimpleUpdateTeam();
 
         /* DELETE Operations */
-        //await SimpleDelete();
+        await SimpleDelete();
         //await DeleteWithRelationship();
 
         /* Tracking vs NoTracking */
@@ -67,7 +67,7 @@ internal class Program
         //await ExecStoredProcedure();
 
         /* Raw SQL non-query commands */
-        await ExecuteNonQueryCommand();
+        //await ExecuteNonQueryCommand();
 
         Console.WriteLine("Press any key to end");
         Console.ReadKey();
@@ -78,8 +78,8 @@ internal class Program
         var teamId2 = 5;
         var affectedRows2 = await context.Database.ExecuteSqlRawAsync("exec sp_DeleteTeamById {0}", teamId2);
 
-        //var teamId11 = 9;
-        //var affectedRows11 = await context.Database.ExecuteSqlInterpolatedAsync($"exec sp_DeleteTeamById {teamId11}");
+        var teamId11 = 9;
+        var affectedRows11 = await context.Database.ExecuteSqlInterpolatedAsync($"exec sp_DeleteTeamById {teamId11}");
     }
 
     private static async Task ExecStoredProcedure()
@@ -186,12 +186,12 @@ internal class Program
     private static async Task AddNewMatches()
     {
         var matches = new List<Match> {
-            new Match {AwayTeamId= 1,HomeTeamId=2,Date=new DateTime(2021,10,28)},
-            new Match {AwayTeamId= 6,HomeTeamId=7,Date=DateTime.Now},
-            new Match {AwayTeamId= 10,HomeTeamId=11,Date=DateTime.Now}
+            new Match {AwayTeamId= 2,HomeTeamId=1,Date=new DateTime(2022,10,28)},
+            new Match {AwayTeamId= 7,HomeTeamId=6,Date=DateTime.Now},
+            new Match {AwayTeamId= 11,HomeTeamId=10,Date=DateTime.Now}
             };
         await context.AddRangeAsync(matches);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync("Simon");
     }
 
     private static async Task AddNewLeagueWithTeams()
@@ -238,10 +238,10 @@ internal class Program
     private static async Task SimpleDelete()
     {
         // Get the object
-        var league = await context.Leagues.FindAsync(9);
+        var match = await context.Matches.FindAsync(10);
         // Delete the object
-        context.Leagues.Remove(league);
-        await context.SaveChangesAsync();
+        context.Matches.Remove(match);
+        await context.SaveChangesAsync("Bob the Builder");
     }
 
     private static async Task SimpleUpdateTeam()
@@ -267,7 +267,7 @@ internal class Program
 
         //// Save Record
         // if it's not really a change, then no update happens - clever huh???  THIS IS TRACKING
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync("Simon");
 
         await GetLeagueRecord(league.Id);
     }
@@ -378,7 +378,7 @@ internal class Program
 
     static async Task AddSingleRecord()
     {
-        await context.Leagues.AddAsync(new League { Name = "Premier League" });
+        await context.Leagues.AddAsync(new League { Name = "Southern" });
         await context.SaveChangesAsync();
     }
 
