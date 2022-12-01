@@ -29,7 +29,7 @@ internal class Program
         //await SimpleUpdateTeam();
 
         /* DELETE Operations */
-        await SimpleDelete();
+        //await SimpleDelete();
         //await DeleteWithRelationship();
 
         /* Tracking vs NoTracking */
@@ -69,8 +69,30 @@ internal class Program
         /* Raw SQL non-query commands */
         //await ExecuteNonQueryCommand();
 
+        /* Temporal Testing */
+        await TeamsQueries();
+        await TeamsQueriesHistory();
+
         Console.WriteLine("Press any key to end");
         Console.ReadKey();
+    }
+
+    private static async Task TeamsQueriesHistory()
+    {
+        var teamsHistory=await context.Teams.TemporalAll().ToListAsync();
+        foreach (var item in teamsHistory)
+        {
+            Console.WriteLine($"{item.Id} - {item.Name}");
+        }
+    }
+
+    private static async Task TeamsQueries()
+    {
+        var teams = await context.Teams.ToListAsync(); ;
+        foreach (var item in teams)
+        {
+            Console.WriteLine($"{item.Id} - {item.Name}");
+        }
     }
 
     private static async Task ExecuteNonQueryCommand()
@@ -392,10 +414,25 @@ internal class Program
 
     static async Task AddLeagueThenTeams()
     {
-        League league = new League { Name = "Serie A" };
-        await context.Leagues.AddAsync(league);
-        await context.SaveChangesAsync();
-        await AddTeamWithLeague(league);
+        var transaction=context.Database.BeginTransaction();
+
+        try
+        {
+            League league = new League { Name = "Serie A" };
+            await context.Leagues.AddAsync(league);
+            await context.SaveChangesAsync();
+            await transaction.CreateSavepointAsync("SavedLeague");
+
+            await AddTeamWithLeague(league);
+            await context.SaveChangesAsync();
+
+            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackToSavepointAsync("SavedLeague");
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private static async Task AddTeamWithLeague(League league)
@@ -419,6 +456,5 @@ internal class Program
             }
         };
         await context.Teams.AddRangeAsync(teams);
-        await context.SaveChangesAsync();
     }
 }

@@ -9,17 +9,21 @@ using System.Threading.Tasks;
 
 namespace EntityFrameworkNet6.Data.Configurations.Entities
 {
-    public class CoachSeedConfiguration : IEntityTypeConfiguration<Coach>
+    public class CoachConfiguration : IEntityTypeConfiguration<Coach>
     {
         public void Configure(EntityTypeBuilder<Coach> builder)
         {
+            builder.Property(p => p.Name).HasMaxLength(50);
+            // A unique multi field index
+            builder.HasIndex(h => new { h.Name, h.TeamId }).IsUnique();
+
             builder.HasData(
-                                new Coach
-                                {
-                                    Id = 20,
-                                    Name = "Harry Redknapp",
-                                    TeamId = 20
-                                },
+                new Coach
+                {
+                    Id = 20,
+                    Name = "Harry Redknapp",
+                    TeamId = 20
+                },
                 new Coach
                 {
                     Id = 21,
@@ -30,8 +34,8 @@ namespace EntityFrameworkNet6.Data.Configurations.Entities
                     Id = 22,
                     Name = "Sir Alf Ramsey"
                 }
+            );
 
-                );
         }
     }
 }
